@@ -3,12 +3,16 @@ package com.sumedh.android.criminalintent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
-
+//import com.sumedh.android.criminalintent.R;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,13 +25,25 @@ public class CrimeListFragment extends Fragment {
     private static final int REQUEST_INT = 1;
     private CrimeAdapter mAdapter;
     private RecyclerView mCrimeRecyclerView;
+    private boolean msubtitleVisible;
 
+    private static final String SAVED_SUBTITLE_VISIBLE="subtitle";
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_crime_list, container, false);
         mCrimeRecyclerView = (RecyclerView) view.findViewById(R.id.crime_recycler_view);
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        if(savedInstanceState!=null){
+            msubtitleVisible = savedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
+        }
         updateUI();
 
         return view;
@@ -38,6 +54,59 @@ public class CrimeListFragment extends Fragment {
         super.onResume();
         updateUI();
     }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(SAVED_SUBTITLE_VISIBLE,msubtitleVisible);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_crime_list,menu);
+
+        MenuItem subtitleItem = menu.findItem(R.id.menu_item_show_subtitle);
+        if(msubtitleVisible){
+            subtitleItem.setTitle(R.string.hide_subtitle);
+        }else{
+            subtitleItem.setTitle(R.string.show_subtitle);
+        }
+    }
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.menu_item_new_crime) {
+            Crime crime = new Crime();
+            CrimeLab.get(getActivity()).addCrime(crime);
+
+            Intent intent = CrimePagerActivity.newIntent(
+                    getActivity(),
+                    crime.getmID()
+            );
+
+            startActivity(intent);
+            return true;
+        } else if (item.getItemId()==R.id.menu_item_show_subtitle) {
+            msubtitleVisible = !msubtitleVisible;
+            getActivity().invalidateOptionsMenu();
+            updateSubtitle();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+    private void updateSubtitle() {
+        CrimeLab crimeLab = CrimeLab.get(getActivity());
+        int crimeCount = crimeLab.getCrimes().size();
+        String subtitle = getString(R.string.subtitle_format, String.valueOf(crimeCount));
+        if(!msubtitleVisible){
+            subtitle = null;
+        }
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.getSupportActionBar().setSubtitle(subtitle);
+    }
+
+    //task to be completed for solved check
     @Override
     public void onActivityResult(int requestCode,int resultCode,Intent data){
         if (requestCode == REQUEST_INT){
@@ -57,6 +126,7 @@ public class CrimeListFragment extends Fragment {
       }else{
           mAdapter.notifyDataSetChanged();
       }
+        updateSubtitle();
     }
 
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener{

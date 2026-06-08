@@ -22,7 +22,9 @@
 
         <activity
             android:name=".CrimePagerActivity"
-            android:exported="false" >
+            android:exported="false"
+            android:parentActivityName=".CrimeListActivity"
+            >
 
         </activity>
 
