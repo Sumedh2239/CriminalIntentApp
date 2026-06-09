@@ -1,5 +1,7 @@
 package com.sumedh.android.criminalintent;
 
+import static android.widget.Toast.LENGTH_LONG;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,10 +15,13 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+
+import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.util.Date;
 import java.util.UUID;
@@ -27,6 +32,7 @@ public class CrimeFragment extends Fragment {
     private EditText mTitleField;
     private Button mDateButton;
     private CheckBox mSolvedCheckBox;
+    private Button deleteButton;
     private static final String ARG_CRIME_ID = "crime_id";
 
     private static final String DIALOG_DATE = "DialogDate";
@@ -50,6 +56,13 @@ public class CrimeFragment extends Fragment {
         UUID crimeID = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeID);
         //Datepickerfragment datefragment=newInstance()
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        CrimeLab.get(getActivity()).updateCrime(mCrime);
+
     }
 
     @Override
@@ -99,7 +112,15 @@ public class CrimeFragment extends Fragment {
                 mCrime.setmSolved(isChecked);
             }
         });
+        deleteButton =(Button) v.findViewById(R.id.delete_button);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int res = CrimeLab.get(getActivity()).deleteCrime(mCrime);
+                Toast.makeText(getActivity(),"Deleted Successfully",LENGTH_LONG);
 
+            }
+        });
         return v;
     }
     @Override
@@ -115,6 +136,7 @@ public class CrimeFragment extends Fragment {
         mDateButton.setText(mCrime.getmDate().toString());
 
     }
+
     public void returnResult(){
         getActivity().setResult(Activity.RESULT_OK,null);
     }

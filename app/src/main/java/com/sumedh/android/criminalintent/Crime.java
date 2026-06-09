@@ -11,7 +11,12 @@ public class Crime {
 
 
     public Crime(){
-        mID = UUID.randomUUID();
+        this(UUID.randomUUID());
+//        mID = UUID.randomUUID();
+//        mDate = new Date();
+    }
+    public Crime(UUID id){
+        mID = id;
         mDate = new Date();
     }
 
