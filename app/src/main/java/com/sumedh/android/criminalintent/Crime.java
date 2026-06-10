@@ -8,6 +8,7 @@ public class Crime {
     private String mTitle;
     private Date mDate;
     private boolean mSolved;
+    private String mSuspect;
 
 
     public Crime(){
@@ -50,5 +51,11 @@ public class Crime {
 
     public void setmTitle(String mTitle) {
         this.mTitle = mTitle;
+    }
+    public String getmSuspect(){
+        return mSuspect;
+    }
+    public void setmSuspect(String suspect){
+        mSuspect=suspect;
     }
 }
